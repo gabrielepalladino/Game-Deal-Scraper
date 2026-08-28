@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Risultati - Game Deal Scraper</title>
+</head>
+<body>
+    <h1>Risultati per: {{ query }}</h1>
+    
+    <a href="/">← Torna indietro</a>
+    
+    {% if games %}
+        <ul>
+        {% for game in games %}
+            <li>
+                <strong>{{ game.title }}</strong>
+                <p>ID: {{ game.id }}</p>
+            </li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Nessun gioco trovato.</p>
+    {% endif %}
+</body>
+</html>
