@@ -7,15 +7,13 @@ def search_games(query):
 
     url = "https://api.isthereanydeal.com/games/search/v1"
 
-    # Autenticazione - può essere header o parametro query
     headers = {
         "ITAD-API-Key": ITAD_API_KEY
     }
 
-    # Parametri corretti secondo la documentazione ufficiale
     params = {
-        "title": query,      # Nome gioco (obbligatorio)
-        "results": 20        # Numero risultati (1-100, default 20)
+        "title": query,
+        "results": 20
     }
 
     try:
@@ -28,8 +26,17 @@ def search_games(query):
 
         response.raise_for_status()
 
-        # L'API ritorna direttamente un array di giochi
-        games = response.json()
+        data = response.json()
+        
+        # 🔍 Gestisci entrambi i casi
+        if isinstance(data, list):
+            # La risposta è già una lista
+            games = data
+        elif isinstance(data, dict):
+            # La risposta è un dizionario con chiave 'data'
+            games = data.get('data', [])
+        else:
+            games = []
         
         print(f"DEBUG - Giochi trovati: {len(games)}")
         if games:
