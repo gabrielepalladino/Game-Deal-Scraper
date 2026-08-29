@@ -11,7 +11,7 @@ def index():
 @app.route('/search', methods=['GET'])
 def search():
     # Ricevi i parametri dal form HTML
-    query = request.args.get('query', '').strip() #USA REQUEST.ARGS NON REQUEST.FORM
+    query = request.args.get('query', '').strip()
     max_price = request.args.get('max_price', '')
     
     # Validazione base
@@ -19,20 +19,24 @@ def search():
         return jsonify({'error': 'Query richiesta'}), 400
     
     # Converti max_price a numero (se inserito)
-    max_price = float(max_price) if max_price else None
+    try:
+        max_price = float(max_price) if max_price else None
+    except ValueError:
+        return jsonify({'error': 'Prezzo massimo non valido'}), 400
     
-    # Chiama la funzione di ricerca
+    # Chiama la funzione di ricerca (ritorna già ordinati per prezzo)
     print(f"DEBUG - Ricerca per: {query}, max_price: {max_price}")
     games = search_games(query)
     print(f"DEBUG - Giochi trovati: {len(games)}")
-    print(f"DEBUG - Giochi: {games}")
     
     # Filtra per prezzo se specificato
-    if max_price and games:
+    if max_price:
         games = [
             g for g in games 
-            if isinstance(g, dict) and g.get('price') and float(g.get('price', float('inf'))) <= max_price
+            if g.get('lowest_price') and float(g.get('lowest_price', float('inf'))) <= max_price
         ]
+        print(f"DEBUG - Giochi dopo filtro prezzo: {len(games)}")
     
+    # I giochi sono già ordinati per prezzo grazie a search_games()
     # Ritorna i risultati
     return render_template('results.html', games=games, query=query)
