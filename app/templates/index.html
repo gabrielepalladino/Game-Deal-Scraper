@@ -8,9 +8,10 @@
 <body>
     <h1 style="text-align: center;">Cerca gioco</h1>
 
-    <form method="POST" action="/search" style="text-align: center; width: 100%;">
-        <input type="text" style="width: fit-content;" placeholder="Inserisci il nome del gioco" id="gameName">
-        <input type="submit">
+    <form method="GET" action="/search" style="text-align: center; width: 100%;">
+        <input type="text" name="query" style="width: fit-content;" placeholder="Inserisci il nome del gioco" id="gameName">
+        <input type="number" name="max_price" style="width: fit-content;" placeholder="Prezzo massimo (opzionale)">
+        <input type="submit" value="Cerca"> 
     </form>
 
 </body>

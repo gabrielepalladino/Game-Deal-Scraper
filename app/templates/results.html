@@ -2,23 +2,159 @@
 <html>
 <head>
     <title>Risultati - Game Deal Scraper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 15px;
+            background-color: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .back-link:hover {
+            background-color: #764ba2;
+        }
+        
+        .game-card {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .game-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .game-card h3 {
+            margin: 0 0 10px 0;
+            color: #333;
+        }
+        
+        .game-card p {
+            margin: 5px 0;
+            color: #666;
+            font-size: 0.95em;
+        }
+        
+        .game-type {
+            display: inline-block;
+            padding: 4px 8px;
+            background-color: #e0e0e0;
+            border-radius: 3px;
+            font-size: 0.85em;
+            margin-right: 10px;
+        }
+        
+        .game-type.game { background-color: #4CAF50; color: white; }
+        .game-type.dlc { background-color: #2196F3; color: white; }
+        .game-type.bundle { background-color: #FF9800; color: white; }
+        
+        .game-id {
+            font-family: monospace;
+            font-size: 0.9em;
+            color: #999;
+            word-break: break-all;
+        }
+        
+        .no-results {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .no-results h2 {
+            margin: 0;
+            color: #ff6b6b;
+        }
+        
+        .results-info {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .results-info strong {
+            color: #1976d2;
+        }
+    </style>
 </head>
 <body>
-    <h1>Risultati per: {{ query }}</h1>
+    <a href="/" class="back-link">← Torna indietro</a>
     
-    <a href="/">← Torna indietro</a>
+    <div class="header">
+        <h1>Risultati ricerca</h1>
+        <p>Query: <strong>{{ query }}</strong></p>
+    </div>
     
     {% if games %}
-        <ul>
+        <div class="results-info">
+            <strong>✓ {{ games|length }} gioco(i) trovato(i)</strong>
+        </div>
+        
         {% for game in games %}
-            <li>
-                <strong>{{ game.title }}</strong>
-                <p>ID: {{ game.id }}</p>
-            </li>
+            <div class="game-card">
+                <div>
+                    <span class="game-type {{ game.type or 'game' }}">
+                        {{ game.type|upper or 'GAME' }}
+                    </span>
+                    {% if game.mature %}
+                        <span class="game-type" style="background-color: #e91e63; color: white;">MATURE</span>
+                    {% endif %}
+                </div>
+                
+                <h3>{{ game.title or 'Titolo non disponibile' }}</h3>
+                
+                {% if game.slug %}
+                    <p><strong>Slug:</strong> {{ game.slug }}</p>
+                {% endif %}
+                
+                <p class="game-id">
+                    <strong>ID:</strong> {{ game.id or 'N/A' }}
+                </p>
+                
+                {% if game.assets and game.assets.boxart %}
+                    <p>
+                        <img src="{{ game.assets.boxart }}" 
+                             alt="{{ game.title }}" 
+                             style="max-width: 150px; max-height: 200px; border-radius: 4px; margin-top: 10px;">
+                    </p>
+                {% endif %}
+            </div>
         {% endfor %}
-        </ul>
+        
     {% else %}
-        <p>Nessun gioco trovato.</p>
+        <div class="no-results">
+            <h2>❌ Nessun gioco trovato</h2>
+            <p>La ricerca per "<strong>{{ query }}</strong>" non ha restituito alcun risultato.</p>
+            <p>Prova a cercare con un nome diverso o più generico.</p>
+        </div>
     {% endif %}
 </body>
 </html>

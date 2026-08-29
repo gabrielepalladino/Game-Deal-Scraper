@@ -11,8 +11,8 @@ def index():
 @app.route('/search', methods=['GET'])
 def search():
     # Ricevi i parametri dal form HTML
-    query = request.form.get('query')  # Il valore di name="query"
-    max_price = request.form.get('max_price')  # Il valore di name="max_price"
+    query = request.args.get('query', '').strip() #USA REQUEST.ARGS NON REQUEST.FORM
+    max_price = request.args.get('max_price', '')
     
     # Validazione base
     if not query:
@@ -21,12 +21,18 @@ def search():
     # Converti max_price a numero (se inserito)
     max_price = float(max_price) if max_price else None
     
-    # Chiama la tua funzione Python
+    # Chiama la funzione di ricerca
+    print(f"DEBUG - Ricerca per: {query}, max_price: {max_price}")
     games = search_games(query)
+    print(f"DEBUG - Giochi trovati: {len(games)}")
+    print(f"DEBUG - Giochi: {games}")
     
     # Filtra per prezzo se specificato
-    if max_price:
-        games = [g for g in games if g.get('price', float('inf')) <= max_price]
+    if max_price and games:
+        games = [
+            g for g in games 
+            if isinstance(g, dict) and g.get('price') and float(g.get('price', float('inf'))) <= max_price
+        ]
     
-    # Ritorna i risultati come JSON (o HTML template)
+    # Ritorna i risultati
     return render_template('results.html', games=games, query=query)
