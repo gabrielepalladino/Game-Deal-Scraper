@@ -35,7 +35,7 @@ def search_games(query):
         games_with_deals = []
         for game in games:
             game_with_deals = get_game_deals(game)
-            if game_with_deals:
+            if game_with_deals:  # Filtra i None (giochi esclusi)
                 games_with_deals.append(game_with_deals)
         
         # Ordina per prezzo (dal più basso al più alto)
@@ -54,13 +54,19 @@ def search_games(query):
 
 
 def get_game_deals(game):
-    """Recupera i prezzi e le offerte per un gioco specifico usando POST"""
+    """Recupera i prezzi e le offerte per un gioco specifico usando POST
+    
+    Ritorna:
+    - game dict se il gioco ha un prezzo valido
+    - None se il gioco è gratuito, non disponibile o non ha deals
+    """
     
     game_id = game.get('id')
+    game_title = game.get('title', 'Sconosciuto')
     
     if not game_id:
-        print(f"WARNING - Gioco senza 'id': {game.get('title')}")
-        return game
+        print(f"WARNING - Gioco senza 'id': {game_title}")
+        return None
     
     url = "https://api.isthereanydeal.com/games/prices/v3"
     
@@ -76,8 +82,8 @@ def get_game_deals(game):
         response = requests.post(url, headers=headers, json=payload, timeout=5)
         
         if response.status_code == 404:
-            print(f"⚠️  {game.get('title')} - Non trovato (404)")
-            return game
+            print(f"⚠️  {game_title} - Non trovato (404)")
+            return None
         
         response.raise_for_status()
         
@@ -98,6 +104,11 @@ def get_game_deals(game):
                 price_info = first_deal.get('price', {})
                 lowest_price = price_info.get('amount')
                 
+                # FILTRO: Escludi giochi gratis (prezzo 0) o senza prezzo
+                if lowest_price == 0 or lowest_price is None:
+                    print(f"⊘ {game_title} - Escluso (gioco gratuito o prezzo non disponibile)")
+                    return None
+                
                 shop_info = first_deal.get('shop', {})
                 shop_name = shop_info.get('name', 'Unknown')
                 
@@ -109,20 +120,21 @@ def get_game_deals(game):
                 game['deals'] = extract_deals_from_prices(deals)
                 
                 price_str = f"€{lowest_price:.2f}" if lowest_price else "N/A"
-                print(f"✓ {game.get('title')} - Prezzo: {price_str} ({shop_name})")
+                print(f"✓ {game_title} - Prezzo: {price_str} ({shop_name})")
+                return game
             else:
-                game['lowest_price'] = None
-                game['best_shop'] = 'Unknown'
-                game['deals'] = []
+                print(f"⊘ {game_title} - Escluso (nessun deal disponibile)")
+                return None
         
-        return game
+        print(f"⊘ {game_title} - Escluso (risposta API vuota)")
+        return None
         
     except requests.exceptions.RequestException as e:
-        print(f"Errore nel recupero deals per {game_id}: {e}")
-        return game
+        print(f"Errore nel recupero deals per {game_title}: {e}")
+        return None
     except (ValueError, AttributeError, KeyError) as e:
-        print(f"Errore nel parsing deals per {game_id}: {e}")
-        return game
+        print(f"Errore nel parsing deals per {game_title}: {e}")
+        return None
 
 
 def extract_deals_from_prices(deals):
