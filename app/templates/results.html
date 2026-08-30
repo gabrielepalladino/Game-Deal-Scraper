@@ -76,11 +76,21 @@
             margin-bottom: 20px;
             border-left: 4px solid #667eea;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         
         .results-info strong {
             color: #667eea;
             font-size: 1.1em;
+        }
+        
+        .pagination-info {
+            color: #666;
+            font-size: 0.95em;
         }
         
         .game-card {
@@ -298,6 +308,79 @@
             opacity: 0.85;
         }
         
+        /* PAGINAZIONE */
+        .pagination-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .pagination-button {
+            padding: 10px 15px;
+            border: 2px solid #667eea;
+            background-color: white;
+            color: #667eea;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .pagination-button:hover:not(:disabled) {
+            background-color: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .pagination-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .pagination-button.active {
+            background-color: #667eea;
+            color: white;
+        }
+        
+        .pagination-info {
+            color: #333;
+            font-weight: 600;
+            margin: 0 15px;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .per-page-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .per-page-selector label {
+            color: #333;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .per-page-selector select {
+            padding: 8px 12px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            font-size: 0.95em;
+            cursor: pointer;
+            background-color: white;
+            color: #333;
+        }
+        
         @media (max-width: 968px) {
             .game-card {
                 grid-template-columns: 1fr;
@@ -325,6 +408,15 @@
             .price-value {
                 font-size: 1.5em;
             }
+            
+            .results-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .pagination-container {
+                flex-direction: column;
+            }
         }
         
         @media (max-width: 600px) {
@@ -340,6 +432,15 @@
             .game-info h3 {
                 font-size: 1.2em;
             }
+            
+            .pagination-info {
+                min-width: auto;
+            }
+            
+            .per-page-selector {
+                flex-direction: column;
+                align-items: flex-start;
+            }
         }
     </style>
 </head>
@@ -352,6 +453,14 @@
         </div>
         
         {% if games %}
+            <div class="results-info">
+                <div>
+                    <strong>{{ total_games }}</strong> gioco{{ '' if total_games == 1 else 'i' }} trovato{{ '' if total_games == 1 else 'i' }} per "<strong>{{ query }}</strong>"
+                </div>
+                <div class="pagination-info">
+                    Pagina <strong>{{ page }}</strong> di <strong>{{ total_pages }}</strong>
+                </div>
+            </div>
             
             {% for game in games %}
                 <div class="game-card">
@@ -368,6 +477,9 @@
                     
                     <div class="game-info">
                         <div class="game-badges">
+                            {% if game.type %}
+                                <span class="game-type {{ game.type }}">{{ game.type|upper }}</span>
+                            {% endif %}
                             {% if game.mature %}
                                 <span class="game-type mature">MATURE</span>
                             {% endif %}
@@ -439,6 +551,61 @@
                     </div>
                 </div>
             {% endfor %}
+            
+            <!-- PAGINAZIONE -->
+            {% if total_pages > 1 %}
+                <div class="pagination-container">
+                    {% set prev_page = page - 1 %}
+                    {% set next_page = page + 1 %}
+                    
+                    <!-- Bottone Pagina Precedente -->
+                    {% if page > 1 %}
+                        <a href="/search?query={{ query }}&page=1&per_page={{ per_page }}{% if max_price %}&max_price={{ max_price }}{% endif %}" 
+                           class="pagination-button">« Inizio</a>
+                        <a href="/search?query={{ query }}&page={{ prev_page }}&per_page={{ per_page }}{% if max_price %}&max_price={{ max_price }}{% endif %}" 
+                           class="pagination-button">‹ Precedente</a>
+                    {% else %}
+                        <button class="pagination-button" disabled>« Inizio</button>
+                        <button class="pagination-button" disabled>‹ Precedente</button>
+                    {% endif %}
+                    
+                    <!-- Info Paginazione -->
+                    <div class="pagination-info">
+                        Pagina {{ page }} di {{ total_pages }}
+                    </div>
+                    
+                    <!-- Bottone Pagina Successiva -->
+                    {% if page < total_pages %}
+                        <a href="/search?query={{ query }}&page={{ next_page }}&per_page={{ per_page }}{% if max_price %}&max_price={{ max_price }}{% endif %}" 
+                           class="pagination-button">Successiva ›</a>
+                        <a href="/search?query={{ query }}&page={{ total_pages }}&per_page={{ per_page }}{% if max_price %}&max_price={{ max_price }}{% endif %}" 
+                           class="pagination-button">Fine »</a>
+                    {% else %}
+                        <button class="pagination-button" disabled>Successiva ›</button>
+                        <button class="pagination-button" disabled>Fine »</button>
+                    {% endif %}
+                    
+                    <!-- Selettore Risultati per Pagina -->
+                    <div class="per-page-selector">
+                        <label for="per-page-select">Risultati per pagina:</label>
+                        <select id="per-page-select" onchange="changePerPage(this.value)">
+                            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                            <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                            <option value="30" {% if per_page == 30 %}selected{% endif %}>30</option>
+                            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <script>
+                    function changePerPage(newPerPage) {
+                        const params = new URLSearchParams(window.location.search);
+                        params.set('per_page', newPerPage);
+                        params.set('page', '1');  // Torna alla prima pagina
+                        window.location.search = params.toString();
+                    }
+                </script>
+            {% endif %}
             
         {% else %}
             <div class="no-results">

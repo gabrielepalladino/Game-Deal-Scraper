@@ -2,8 +2,17 @@ import requests
 from config import ITAD_API_KEY
 
 
-def search_games(query):
-    """Cerca giochi su IsThereAnyDeal usando endpoint /games/search/v1"""
+def search_games(query, limit=100):
+    """
+    Cerca giochi su IsThereAnyDeal usando endpoint /games/search/v1
+    
+    Args:
+        query: Titolo del gioco da cercare
+        limit: Numero massimo di risultati (max 100)
+    
+    Returns:
+        Lista di giochi con prezzi ordinati per rilevanza e prezzo
+    """
 
     url = "https://api.isthereanydeal.com/games/search/v1"
 
@@ -11,9 +20,12 @@ def search_games(query):
         "ITAD-API-Key": ITAD_API_KEY
     }
 
+    # Limita a max 100 per l'API ITAD
+    limit = min(int(limit), 100)
+    
     params = {
         "title": query,
-        "results": 20
+        "results": limit
     }
 
     try:
@@ -25,11 +37,15 @@ def search_games(query):
         if isinstance(games, dict):
             games = games.get('data', [])
         
-        print(f"DEBUG - Giochi trovati: {len(games) if isinstance(games, list) else 0}")
+        print(f"DEBUG - Giochi trovati (prima del ranking): {len(games) if isinstance(games, list) else 0}")
         
         if not isinstance(games, list):
             print(f"ERROR - Risposta non è una lista: {type(games)}")
             return []
+        
+        # Applica ranking intelligente PRIMA di recuperare i prezzi
+        games = rank_games(games, query)
+        print(f"DEBUG - Giochi dopo ranking: {len(games)}")
         
         # Ora per ogni gioco, recupera i prezzi/deals
         games_with_deals = []
@@ -53,8 +69,76 @@ def search_games(query):
         return []
 
 
+def rank_games(games, query):
+    """
+    Ordina i giochi per rilevanza usando un sistema di ranking intelligente.
+    
+    Criteri di ranking (dal più importante al meno importante):
+    1. Esatto match del titolo
+    2. Gioco principale (type="game") vs DLC/Bundle
+    3. Qualità della corrispondenza con il titolo (edit distance)
+    4. Popolarità approssimativa
+    
+    Args:
+        games: Lista di giochi dall'API
+        query: Query di ricerca originale
+    
+    Returns:
+        Lista ordinata per rilevanza
+    """
+    
+    query_lower = query.lower().strip()
+    
+    def calculate_relevance_score(game):
+        """Calcola uno score di rilevanza (più alto = più rilevante)"""
+        title = game.get('title', '').lower()
+        game_type = game.get('type', 'game')
+        
+        score = 0
+        
+        # Criterio 1: Esatto match (massima priorità)
+        if title == query_lower:
+            score += 10000
+        # Se il titolo contiene esattamente la query (es. "Cyberpunk 2077" contiene "Cyberpunk")
+        elif title.startswith(query_lower):
+            score += 5000
+        elif query_lower in title:
+            score += 2000
+        
+        # Criterio 2: Tipo di gioco (i giochi principali vengono prima dei DLC/bundle)
+        if game_type == 'game':
+            score += 500
+        elif game_type == 'dlc':
+            score += 100
+        elif game_type == 'bundle':
+            score += 50
+        
+        # Criterio 3: Lunghezza del titolo (titoli più specifici hanno priorità)
+        # Es. "Cyberpunk 2077" (2 parole) prima di "Cyberpunk 2077: Phantom Liberty" (4 parole)
+        title_words = len(title.split())
+        if title_words <= 4:  # Titoli brevi e specifici
+            score += 300 - (title_words * 10)
+        
+        # Criterio 4: Mature content (deprioritizza)
+        if game.get('mature', False):
+            score -= 100
+        
+        return score
+    
+    # Ordina i giochi per score (decrescente = più rilevante per primo)
+    ranked_games = sorted(games, key=calculate_relevance_score, reverse=True)
+    
+    # Debug: stampa i primi 5 giochi con il loro score
+    for idx, game in enumerate(ranked_games[:5]):
+        score = calculate_relevance_score(game)
+        print(f"  [{idx+1}] {game.get('title')} ({game.get('type')}) - Score: {score}")
+    
+    return ranked_games
+
+
 def get_game_deals(game):
-    """Recupera i prezzi e le offerte per un gioco specifico usando POST
+    """
+    Recupera i prezzi e le offerte per un gioco specifico usando POST
     
     Ritorna:
     - game dict se il gioco ha un prezzo valido
