@@ -1,6 +1,6 @@
 from flask import render_template, request, jsonify
 from app import app
-from app.scrapers.game_scraper import search_games
+from app.scrapers.game_scraper import build_search_url, search_games
 import math
 
 
@@ -47,16 +47,8 @@ def search():
     
     # Chiama la funzione di ricerca (ritorna già ordinati per prezzo e rilevanza)
     print(f"DEBUG - Ricerca per: {query}, max_price: {max_price}")
-    games = search_games(query, limit=100)  # Aumentato a 100
+    games = search_games(query, limit=100, max_price=max_price)  # Aumentato a 100
     print(f"DEBUG - Giochi trovati: {len(games)}")
-    
-    # Filtra per prezzo se specificato
-    if max_price:
-        games = [
-            g for g in games 
-            if g.get('lowest_price') and float(g.get('lowest_price', float('inf'))) <= max_price
-        ]
-        print(f"DEBUG - Giochi dopo filtro prezzo: {len(games)}")
     
     # Calcola paginazione
     total_games = len(games)
@@ -82,5 +74,6 @@ def search():
         total_pages=total_pages,
         total_games=total_games,
         per_page=per_page,
-        max_price=max_price
+        max_price=max_price,
+        build_search_url=build_search_url
     )
