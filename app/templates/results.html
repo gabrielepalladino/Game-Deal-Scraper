@@ -35,7 +35,23 @@
     <section class="results-list" aria-label="Lista offerte giochi">
         {% for game in games %}
             {% set current_price = game.lowest_deal_price or game.lowest_price %}
-            <article class="game-card">
+            <article class="game-card results-game-card">
+                <button
+                    type="button"
+                    class="wishlist-button"
+                    data-wishlist-button
+                    data-game-id="{{ game.id or game.title }}"
+                    data-game-title="{{ game.title or 'Titolo non disponibile' }}"
+                    data-game-image="{{ game.assets.boxart if game.assets and game.assets.boxart else '' }}"
+                    data-game-price="{{ current_price or '' }}"
+                    data-game-shop="{{ game.best_shop or '' }}"
+                    data-game-type="{{ game.type or '' }}"
+                    aria-label="Aggiungi {{ game.title }} alla wishlist"
+                    aria-pressed="false"
+                    title="Aggiungi alla wishlist"
+                >
+                    <span aria-hidden="true">♡</span>
+                </button>
                 <div class="game-cover">
                     {% if game.assets and game.assets.boxart %}
                         <img src="{{ game.assets.boxart }}" alt="Copertina di {{ game.title }}" loading="lazy">
