@@ -10,6 +10,12 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/wishlist')
+def wishlist():
+    """Mostra i giochi salvati nel browser dell'utente."""
+    return render_template('wishlist.html')
+
+
 # Route che riceve i dati dal form
 @app.route('/search', methods=['GET'])
 def search():

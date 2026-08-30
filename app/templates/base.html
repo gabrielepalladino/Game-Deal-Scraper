@@ -12,11 +12,25 @@
 </head>
 <body>
     <div class="app-shell">
+        <header class="site-header">
+            <a href="{{ url_for('index') }}" class="brand">
+                <span class="brand-mark" aria-hidden="true">🎮</span>
+                <span>Game Deal Scraper</span>
+            </a>
+            <nav class="site-nav" aria-label="Navigazione principale">
+                <a href="{{ url_for('index') }}">Cerca</a>
+                <a href="{{ url_for('wishlist') }}" class="wishlist-nav-link">
+                    Wishlist
+                    <span class="wishlist-count" data-wishlist-count aria-label="0 giochi salvati">0</span>
+                </a>
+            </nav>
+        </header>
         <main>
             {% block content %}{% endblock %}
         </main>
     </div>
 
     <script src="{{ url_for('static', filename='js/filters.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/wishlist.js') }}" defer></script>
 </body>
 </html>

@@ -16,6 +16,7 @@ Una web app che **ricerca e aggrega le offerte più convenienti per videogiochi*
 ✅ **Dashboard responsive** — Interfaccia moderna e mobile-friendly  
 ✅ **Integrazione API** — Sfrutta l'API pubblica di IsThereAnyDeal per dati sempre aggiornati  
 ✅ **Zero scraping complesso** — Nessun web scraping, solo API pulite e stabili  
+✅ **Wishlist locale** — Salva i giochi preferiti nel browser, senza account
 
 ---
 
@@ -216,7 +217,7 @@ def api_games(query):
 - [ ] **Filtro per valutazione** (Metacritic, IGDb)
 - [ ] **Storico prezzi** (grafico dell'andamento prezzi nel tempo)
 - [ ] **Notifiche** (avvisa quando un gioco scende sotto un certo prezzo)
-- [ ] **Wishlist** (salva giochi preferiti in locale)
+- [x] **Wishlist** (salva giochi preferiti in locale)
 - [ ] **Integrazione Twitch/YouTube** (link a trailer)
 - [ ] **Database persistente** (SQLite/PostgreSQL)
 - [ ] **Deploy su cloud** (Heroku, Vercel, Railway)

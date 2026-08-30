@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Wishlist - Game Deal Scraper{% endblock %}
+
+{% block content %}
+<section class="results-hero wishlist-hero">
+    <a href="{{ url_for('index') }}" class="back-link">← Cerca giochi</a>
+    <div class="results-heading">
+        <p class="eyebrow">I tuoi preferiti</p>
+        <h1>Wishlist</h1>
+        <p>I giochi restano salvati su questo dispositivo, senza registrazione.</p>
+    </div>
+</section>
+
+<section class="results-list" data-wishlist-list aria-live="polite" aria-label="Giochi nella wishlist"></section>
+
+<section class="empty-state" data-wishlist-empty hidden>
+    <span aria-hidden="true">♡</span>
+    <h2>La tua wishlist è vuota</h2>
+    <p>Cerca un gioco e premi il cuore per ritrovarlo qui.</p>
+    <a href="{{ url_for('index') }}" class="primary-button">Cerca un gioco</a>
+</section>
+{% endblock %}

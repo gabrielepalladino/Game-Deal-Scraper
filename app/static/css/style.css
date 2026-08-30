@@ -51,6 +51,7 @@ a { color: inherit; }
     gap: 18px;
     padding: 14px 18px;
     border-radius: 999px;
+    margin-top: 18px;
 }
 
 .brand, .site-nav { display: flex; align-items: center; gap: 12px; }
@@ -62,6 +63,11 @@ a { color: inherit; }
 }
 .site-nav a { color: var(--muted); font-size: 0.95rem; font-weight: 600; text-decoration: none; }
 .site-nav a:hover { color: var(--text-strong); }
+.wishlist-nav-link { display: inline-flex; align-items: center; gap: 7px; }
+.wishlist-count {
+    display: grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px;
+    border-radius: 999px; color: white; background: var(--accent); font-size: .75rem;
+}
 
 .hero, .results-hero {
     display: grid;
@@ -106,7 +112,17 @@ input:focus, select:focus { border-color: rgba(103, 232, 249, .8); box-shadow: 0
 .per-page-selector { display: flex; align-items: center; gap: 10px; }
 .per-page-selector select { width: auto; padding: 10px 36px 10px 12px; }
 .results-list { display: grid; gap: 16px; }
-.game-card { display: grid; grid-template-columns: 108px 1fr 190px; gap: 20px; padding: 18px; border-radius: var(--radius-lg); }
+.game-card { position: relative; display: grid; grid-template-columns: 108px 1fr 190px; gap: 20px; padding: 18px; border-radius: var(--radius-lg); }
+.wishlist-button {
+    position: absolute; z-index: 1; top: 12px; right: 12px; display: grid; place-items: center;
+    width: 38px; height: 38px; padding: 0; border: 1px solid var(--line); border-radius: 50%;
+    color: var(--text-strong); background: rgba(8, 17, 31, .88); font-size: 1.45rem; cursor: pointer;
+    transition: transform .15s ease, color .15s ease, background .15s ease;
+}
+.wishlist-button:hover { transform: scale(1.08); }
+.wishlist-button:focus-visible { outline: 3px solid rgba(103, 232, 249, .7); outline-offset: 2px; }
+.wishlist-button.is-saved { color: #fb7185; background: rgba(136, 19, 55, .8); }
+.results-game-card .price-card { padding-top: 48px; }
 .game-cover img, .game-image-placeholder { width: 108px; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 18px; background: linear-gradient(135deg, #1e293b, #312e81); }
 .game-image-placeholder { display: grid; place-items: center; font-size: 2rem; }
 .game-info h2 { margin: 8px 0 6px; color: var(--text-strong); font-size: 1.45rem; }
@@ -132,6 +148,13 @@ input:focus, select:focus { border-color: rgba(103, 232, 249, .8); box-shadow: 0
 .empty-state h2 { color: var(--text-strong); font-size: 2rem; }
 .empty-state p { color: var(--muted); }
 .empty-state .primary-button { display: inline-block; margin-top: 12px; }
+.wishlist-hero { padding-bottom: 34px; }
+.wishlist-actions { padding-top: 48px; }
+.remove-wishlist-button {
+    border: 1px solid rgba(251, 113, 133, .45); border-radius: 12px; padding: 9px 13px;
+    color: #fecdd3; background: rgba(136, 19, 55, .3); font: inherit; font-weight: 800; cursor: pointer;
+}
+.remove-wishlist-button:hover { background: rgba(190, 24, 93, .45); }
 
 @media (max-width: 860px) {
     .hero, .results-hero, .feature-grid, .game-card { grid-template-columns: 1fr; }
