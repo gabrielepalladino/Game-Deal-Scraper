@@ -1,18 +1,48 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Deal Scraper</title>
-</head>
-<body>
-    <h1 style="text-align: center;">Cerca gioco</h1>
+{% extends "base.html" %}
 
-    <form method="GET" action="/search" style="text-align: center; width: 100%;">
-        <input type="text" name="query" style="width: fit-content;" placeholder="Inserisci il nome del gioco" id="gameName">
-        <input type="number" name="max_price" style="width: fit-content;" placeholder="Prezzo massimo (opzionale)">
-        <input type="submit" value="Cerca"> 
+{% block title %}Cerca offerte giochi - Game Deal Scraper{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">Deal finder per gamer</p>
+        <h1>Trova il miglior prezzo per il tuo prossimo gioco.</h1>
+        <p class="hero-text">
+            Cerca tra offerte digitali, confronta il prezzo più basso e filtra subito per budget.
+        </p>
+    </div>
+
+    <form method="GET" action="/search" class="search-panel" aria-label="Cerca offerte videogiochi">
+        <div class="field field-large">
+            <label for="gameName">Nome gioco</label>
+            <input type="text" name="query" placeholder="Es. Elden Ring, Hades, Cyberpunk" id="gameName" required autofocus>
+        </div>
+        <div class="field">
+            <label for="maxPrice">Budget massimo</label>
+            <div class="price-input">
+                <span>€</span>
+                <input type="number" name="max_price" placeholder="Opzionale" id="maxPrice" min="0" step="0.01">
+            </div>
+        </div>
+        <button type="submit" class="primary-button">Cerca offerte</button>
     </form>
+</section>
 
-</body>
-</html>
+<section class="feature-grid" aria-label="Funzionalità principali">
+    <article class="feature-card">
+        <span class="feature-icon">⚡</span>
+        <h2>Ricerca rapida</h2>
+        <p>Risultati ordinati per rilevanza e prezzo per arrivare prima al deal giusto.</p>
+    </article>
+    <article class="feature-card">
+        <span class="feature-icon">💸</span>
+        <h2>Focus risparmio</h2>
+        <p>Il miglior negozio e le alternative più convenienti restano sempre in evidenza.</p>
+    </article>
+    <article class="feature-card">
+        <span class="feature-icon">📱</span>
+        <h2>Mobile friendly</h2>
+        <p>Layout responsive pensato per controllare offerte anche da smartphone.</p>
+    </article>
+</section>
+{% endblock %}

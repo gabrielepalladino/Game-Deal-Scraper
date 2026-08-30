@@ -1,619 +1,108 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Risultati - Game Deal Scraper</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            padding: 12px 20px;
-            background-color: rgba(255, 255, 255, 0.9);
-            color: #667eea;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-        }
-
-        .back-link:hover {
-            background-color: white;
-            transform: translateX(-5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .header {
-            background: white;
-            color: #333;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .header h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header p {
-            font-size: 1.1em;
-            color: #666;
-        }
-
-        .header strong {
-            color: #667eea;
-        }
-
-        .results-info {
-            background-color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #667eea;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .results-info strong {
-            color: #667eea;
-            font-size: 1.1em;
-        }
-
-        .pagination-info {
-            color: #666;
-            font-size: 0.95em;
-        }
-
-        .game-card {
-            background-color: white;
-            border: none;
-            padding: 25px;
-            margin: 15px 0;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            display: grid;
-            grid-template-columns: 140px 1fr 200px;
-            gap: 25px;
-            align-items: start;
-        }
-
-        .game-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-
-        .game-image {
-            grid-column: 1;
-        }
-
-        .game-image img {
-            width: 100%;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            object-fit: cover;
-        }
-
-        .game-image-placeholder {
-            width: 100%;
-            aspect-ratio: 2/3;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 3em;
-        }
-
-        .game-info {
-            grid-column: 2;
-        }
-
-        .game-info h3 {
-            margin: 0 0 15px 0;
-            color: #333;
-            font-size: 1.5em;
-            font-weight: 700;
-        }
-
-        .game-badges {
-            margin-bottom: 15px;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .game-type {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.75em;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .game-type.game {
-            background-color: #4CAF50;
-            color: white;
-        }
-
-        .game-type.dlc {
-            background-color: #2196F3;
-            color: white;
-        }
-
-        .game-type.bundle {
-            background-color: #FF9800;
-            color: white;
-        }
-
-        .game-type.mature {
-            background-color: #e91e63;
-            color: white;
-        }
-
-        .game-details {
-            margin: 15px 0;
-            padding: 12px;
-            background-color: #f5f5f5;
-            border-radius: 6px;
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .game-details p {
-            margin: 5px 0;
-            word-break: break-all;
-        }
-
-        .game-details strong {
-            color: #333;
-        }
-
-        .game-prices {
-            grid-column: 3;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 8px;
-            color: white;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            height: fit-content;
-            position: sticky;
-            top: 20px;
-        }
-
-        .price-section {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 14px;
-            border-radius: 6px;
-        }
-
-        .price-label {
-            font-size: 0.8em;
-            opacity: 0.9;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        }
-
-        .price-value {
-            font-size: 2em;
-            font-weight: 700;
-        }
-
-        .deals-list {
-            margin-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.3);
-            padding-top: 10px;
-        }
-
-        .deals-title {
-            font-size: 0.75em;
-            font-weight: 600;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            opacity: 0.9;
-        }
-
-        .deal-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 8px 10px;
-            margin: 4px 0;
-            border-radius: 4px;
-            font-size: 0.8em;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-align: left;
-        }
-
-        .deal-shop {
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            margin-right: 8px;
-        }
-
-        .deal-price {
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .deal-best {
-            background: rgba(255, 255, 255, 0.2);
-            border-left: 2px solid #FFC107;
-        }
-
-        .no-results {
-            background-color: white;
-            border: 2px solid #FF9800;
-            padding: 40px;
-            border-radius: 12px;
-            margin-top: 20px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .no-results h2 {
-            margin: 0 0 15px 0;
-            color: #FF9800;
-            font-size: 1.8em;
-        }
-
-        .no-results p {
-            color: #666;
-            margin: 8px 0;
-            font-size: 1.05em;
-        }
-
-        .no-price-message {
-            font-size: 0.9em;
-            font-style: italic;
-            opacity: 0.85;
-        }
-
-        /* PAGINAZIONE */
-        .pagination-container {
-            background-color: white;
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .pagination-button {
-            padding: 10px 15px;
-            border: 2px solid #667eea;
-            background-color: white;
-            color: #667eea;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .pagination-button:hover:not(:disabled) {
-            background-color: #667eea;
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .pagination-button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .pagination-button.active {
-            background-color: #667eea;
-            color: white;
-        }
-
-        .pagination-info {
-            color: #333;
-            font-weight: 600;
-            margin: 0 15px;
-            min-width: 200px;
-            text-align: center;
-        }
-
-        .per-page-selector {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .per-page-selector label {
-            color: #333;
-            font-weight: 600;
-            font-size: 0.95em;
-        }
-
-        .per-page-selector select {
-            padding: 8px 12px;
-            border: 2px solid #667eea;
-            border-radius: 6px;
-            font-size: 0.95em;
-            cursor: pointer;
-            background-color: white;
-            color: #333;
-        }
-
-        @media (max-width: 968px) {
-            .game-card {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .game-image {
-                grid-column: 1;
-            }
-
-            .game-info {
-                grid-column: 1;
-            }
-
-            .game-prices {
-                grid-column: 1;
-                position: static;
-                sticky: none;
-            }
-
-            .header h1 {
-                font-size: 1.8em;
-            }
-
-            .price-value {
-                font-size: 1.5em;
-            }
-
-            .results-info {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .pagination-container {
-                flex-direction: column;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .game-card {
-                padding: 15px;
-                gap: 12px;
-            }
-
-            .game-image-placeholder {
-                font-size: 2em;
-            }
-
-            .game-info h3 {
-                font-size: 1.2em;
-            }
-
-            .pagination-info {
-                min-width: auto;
-            }
-
-            .per-page-selector {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <a href="/" class="back-link">← Torna indietro</a>
-
-        <div class="header">
-            <h1>🎮 Risultati ricerca</h1>
-        </div>
-
+{% extends "base.html" %}
+
+{% block title %}Risultati per {{ query }} - Game Deal Scraper{% endblock %}
+
+{% block content %}
+<section class="results-hero">
+    <a href="/" class="back-link">← Nuova ricerca</a>
+    <div class="results-heading">
+        <p class="eyebrow">Risultati ricerca</p>
+        <h1>Offerte per “{{ query }}”</h1>
         {% if games %}
-            <div class="results-info">
-                <div>
-                    <strong>{{ total_games }}</strong> gioco{{ '' if total_games == 1 else 'i' }} trovato{{ '' if total_games == 1 else 'i' }} per "<strong>{{ query }}</strong>"
-                </div>
-                <div class="pagination-info">
-                    Pagina <strong>{{ page }}</strong> di <strong>{{ total_pages }}</strong>
-                </div>
-            </div>
-
-            {% for game in games %}
-                <div class="game-card">
-                    <div class="game-image">
-                        {% if game.assets and game.assets.boxart %}
-                            <img src="{{ game.assets.boxart }}"
-                                 alt="{{ game.title }}"
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                        {% endif %}
-                        {% if not game.assets or not game.assets.boxart %}
-                            <div class="game-image-placeholder">🎮</div>
-                        {% endif %}
-                    </div>
-
-                    <div class="game-info">
-                        <div class="game-badges">
-                            {% if game.type %}
-                                <span class="game-type {{ game.type }}">{{ game.type|upper }}</span>
-                            {% endif %}
-                            {% if game.mature %}
-                                <span class="game-type mature">MATURE</span>
-                            {% endif %}
-                        </div>
-
-                        <h3>{{ game.title or 'Titolo non disponibile' }}</h3>
-
-                        <div class="game-details">
-                        </div>
-                    </div>
-
-                    <div class="game-prices">
-                        {% if game.lowest_price %}
-                            <div class="price-section">
-                                <div class="price-label">💰 Miglior Prezzo</div>
-                                <div class="price-value">
-                                    {% if game.lowest_price is number %}
-                                        €{{ "%.2f"|format(game.lowest_price) }}
-                                    {% else %}
-                                        €{{ game.lowest_price }}
-                                    {% endif %}
-                                </div>
-                            </div>
-
-                            {% if game.lowest_deal_price %}
-                                {% set price_val = game.lowest_price|float %}
-                                {% set deal_val = game.lowest_deal_price|float %}
-                                {% if deal_val < price_val %}
-                                    <div class="price-section" style="background: rgba(76, 175, 80, 0.3); border-left: 3px solid #4CAF50;">
-                                        <div class="price-label">🎉 In Offerta</div>
-                                        <div class="price-value">
-                                            €{{ "%.2f"|format(deal_val) }}
-                                        </div>
-                                        <div style="font-size: 0.75em; opacity: 0.9; margin-top: 4px;">
-                                            Sconto: {{ ((price_val - deal_val) / price_val * 100)|int }}%
-                                        </div>
-                                    </div>
-                                {% endif %}
-                            {% endif %}
-
-                            {% if game.best_shop %}
-                                <div class="price-section">
-                                    <div class="price-label">🏪 Miglior Negozio</div>
-                                    <div style="font-size: 0.95em; font-weight: 600;">
-                                        {{ game.best_shop }}
-                                    </div>
-                                </div>
-                            {% endif %}
-
-                            {% if game.deals and game.deals|length > 0 %}
-                                <div class="deals-list">
-                                    <div class="deals-title">📋 Altre Offerte</div>
-                                    {% for deal in game.deals[:8] %}
-                                        {% if deal.price %}
-                                            <div class="deal-item {% if deal.is_best %}deal-best{% endif %}">
-                                                <span class="deal-shop">{{ deal.shop_name }}</span>
-                                                <span class="deal-price">€{{ "%.2f"|format(deal.price) }}</span>
-                                            </div>
-                                        {% endif %}
-                                    {% endfor %}
-                                </div>
-                            {% endif %}
-                        {% else %}
-                            <div class="price-section">
-                                <div class="no-price-message">📊 Prezzo non disponibile</div>
-                                <p style="font-size: 0.8em; margin-top: 8px; opacity: 0.8;">Gioco non trovato sui negozi supportati</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-            {% endfor %}
-
-            <!-- PAGINAZIONE -->
-            {% if total_pages > 1 %}
-                <div class="pagination-container">
-                    {% set prev_page = page - 1 %}
-                    {% set next_page = page + 1 %}
-
-                    <!-- Bottone Pagina Precedente -->
-                    {% if page > 1 %}
-                        <a href="{{ build_search_url(query, 1, per_page, max_price) }}"
-                           class="pagination-button">« Inizio</a>
-                        <a href="{{ build_search_url(query, prev_page, per_page, max_price) }}"
-                           class="pagination-button">‹ Precedente</a>
-                    {% else %}
-                        <button class="pagination-button" disabled>« Inizio</button>
-                        <button class="pagination-button" disabled>‹ Precedente</button>
-                    {% endif %}
-
-                    <!-- Info Paginazione -->
-                    <div class="pagination-info">
-                        Pagina {{ page }} di {{ total_pages }}
-                    </div>
-
-                    <!-- Bottone Pagina Successiva -->
-                    {% if page < total_pages %}
-                        <a href="{{ build_search_url(query, next_page, per_page, max_price) }}"
-                           class="pagination-button">Successiva ›</a>
-                        <a href="{{ build_search_url(query, total_pages, per_page, max_price) }}"
-                           class="pagination-button">Fine »</a>
-                    {% else %}
-                        <button class="pagination-button" disabled>Successiva ›</button>
-                        <button class="pagination-button" disabled>Fine »</button>
-                    {% endif %}
-
-                    <!-- Selettore Risultati per Pagina -->
-                    <div class="per-page-selector">
-                        <label for="per-page-select">Risultati per pagina:</label>
-                        <select id="per-page-select" onchange="changePerPage(this.value)">
-                            <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
-                            <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
-                            <option value="30" {% if per_page == 30 %}selected{% endif %}>30</option>
-                            <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
-                        </select>
-                    </div>
-                </div>
-
-                <script>
-                    function changePerPage(newPerPage) {
-                        const params = new URLSearchParams(window.location.search);
-                        params.set('per_page', newPerPage);
-                        params.set('page', '1');  // Torna alla prima pagina
-                        window.location.search = params.toString();
-                    }
-                </script>
-            {% endif %}
-
+            <p>{{ total_games }} risultato{{ '' if total_games == 1 else 'i' }} trovato{{ '' if total_games == 1 else 'i' }}{% if max_price %} entro €{{ "%.2f"|format(max_price) }}{% endif %}.</p>
         {% else %}
-            <div class="no-results">
-                <h2>❌ Nessun gioco trovato</h2>
-                <p>La ricerca per "<strong>{{ query }}</strong>" non ha restituito alcun risultato.</p>
-                <p>Prova a cercare con un nome diverso o più generico.</p>
-            </div>
+            <p>Nessun risultato disponibile: prova una query più generica o rimuovi il budget massimo.</p>
         {% endif %}
     </div>
-</body>
-</html>
+</section>
+
+{% if games %}
+    <section class="toolbar" aria-label="Riepilogo risultati">
+        <div>
+            <strong>{{ total_games }}</strong> giochi · pagina <strong>{{ page }}</strong>/<strong>{{ total_pages }}</strong>
+        </div>
+        <div class="per-page-selector">
+            <label for="per-page-select">Risultati per pagina</label>
+            <select id="per-page-select" data-per-page-select>
+                <option value="10" {% if per_page == 10 %}selected{% endif %}>10</option>
+                <option value="20" {% if per_page == 20 %}selected{% endif %}>20</option>
+                <option value="30" {% if per_page == 30 %}selected{% endif %}>30</option>
+                <option value="50" {% if per_page == 50 %}selected{% endif %}>50</option>
+            </select>
+        </div>
+    </section>
+
+    <section class="results-list" aria-label="Lista offerte giochi">
+        {% for game in games %}
+            {% set current_price = game.lowest_deal_price or game.lowest_price %}
+            <article class="game-card">
+                <div class="game-cover">
+                    {% if game.assets and game.assets.boxart %}
+                        <img src="{{ game.assets.boxart }}" alt="Copertina di {{ game.title }}" loading="lazy">
+                    {% else %}
+                        <div class="game-image-placeholder">🎮</div>
+                    {% endif %}
+                </div>
+
+                <div class="game-info">
+                    <div class="game-badges">
+                        {% if game.type %}<span class="pill pill-soft">{{ game.type|upper }}</span>{% endif %}
+                        {% if game.mature %}<span class="pill pill-alert">MATURE</span>{% endif %}
+                    </div>
+                    <h2>{{ game.title or 'Titolo non disponibile' }}</h2>
+                    <p class="game-summary">Confronto offerte dai negozi supportati con priorità a prezzo e pertinenza.</p>
+
+                    {% if game.deals and game.deals|length > 0 %}
+                        <div class="deals-list">
+                            <span class="deals-title">Alternative rapide</span>
+                            {% for deal in game.deals[:4] %}
+                                {% if deal.price %}
+                                    <div class="deal-item {% if deal.is_best %}deal-best{% endif %}">
+                                        <span class="deal-shop">{{ deal.shop_name }}</span>
+                                        <span class="deal-price">€{{ "%.2f"|format(deal.price) }}</span>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <aside class="price-card" aria-label="Prezzo migliore">
+                    {% if current_price %}
+                        <span class="price-label">Miglior prezzo</span>
+                        <strong class="price-value">€{{ "%.2f"|format(current_price|float) }}</strong>
+                        {% if game.best_shop %}<span class="shop-name">{{ game.best_shop }}</span>{% endif %}
+                        {% if game.lowest_deal_price and game.lowest_price and (game.lowest_deal_price|float) < (game.lowest_price|float) %}
+                            <span class="discount-badge">-{{ (((game.lowest_price|float) - (game.lowest_deal_price|float)) / (game.lowest_price|float) * 100)|int }}%</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="price-label">Prezzo</span>
+                        <strong class="unavailable">Non disponibile</strong>
+                    {% endif %}
+                </aside>
+            </article>
+        {% endfor %}
+    </section>
+
+    {% if total_pages > 1 %}
+        <nav class="pagination-container" aria-label="Paginazione risultati">
+            {% if page > 1 %}
+                <a href="{{ build_search_url(query, 1, per_page, max_price) }}" class="pagination-button">« Inizio</a>
+                <a href="{{ build_search_url(query, page - 1, per_page, max_price) }}" class="pagination-button">‹ Precedente</a>
+            {% endif %}
+            <span class="pagination-info">Pagina {{ page }} di {{ total_pages }}</span>
+            {% if page < total_pages %}
+                <a href="{{ build_search_url(query, page + 1, per_page, max_price) }}" class="pagination-button">Successiva ›</a>
+                <a href="{{ build_search_url(query, total_pages, per_page, max_price) }}" class="pagination-button">Fine »</a>
+            {% endif %}
+        </nav>
+    {% endif %}
+{% else %}
+    <section class="empty-state">
+        <span>🕹️</span>
+        <h2>Nessun gioco trovato</h2>
+        <p>Controlla il titolo, prova parole chiave più brevi oppure aumenta il budget massimo.</p>
+        <a href="/" class="primary-button">Torna alla ricerca</a>
+    </section>
+{% endif %}
+{% endblock %}
