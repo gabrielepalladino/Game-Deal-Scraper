@@ -123,7 +123,8 @@ input:focus, select:focus { border-color: rgba(103, 232, 249, .8); box-shadow: 0
 .wishlist-button:focus-visible { outline: 3px solid rgba(103, 232, 249, .7); outline-offset: 2px; }
 .wishlist-button.is-saved { color: #fb7185; background: rgba(136, 19, 55, .8); }
 .results-game-card .price-card { padding-top: 48px; }
-.game-cover img, .game-image-placeholder { width: 108px; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 18px; background: linear-gradient(135deg, #1e293b, #312e81); }
+.game-cover { width: 108px; aspect-ratio: 3 / 4; overflow: hidden; border-radius: 18px; background: linear-gradient(135deg, #1e293b, #312e81); }
+.game-cover img, .game-image-placeholder { display: block; width: 100%; height: 100%; object-fit: cover; background: linear-gradient(135deg, #1e293b, #312e81); }
 .game-image-placeholder { display: grid; place-items: center; font-size: 2rem; }
 .game-info h2 { margin: 8px 0 6px; color: var(--text-strong); font-size: 1.45rem; }
 .game-badges { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -158,7 +159,7 @@ input:focus, select:focus { border-color: rgba(103, 232, 249, .8); box-shadow: 0
 
 @media (max-width: 860px) {
     .hero, .results-hero, .feature-grid, .game-card { grid-template-columns: 1fr; }
-    .game-cover img, .game-image-placeholder { width: 100%; max-height: 280px; }
+    .game-cover { width: 100%; max-height: 360px; }
     .toolbar, .site-header { align-items: flex-start; flex-direction: column; border-radius: 24px; }
     .price-card { place-items: start; text-align: left; }
 }

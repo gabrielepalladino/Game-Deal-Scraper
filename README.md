@@ -15,6 +15,7 @@ Una web app che **ricerca e aggrega le offerte più convenienti per videogiochi*
 ✅ **Filtri avanzati** — Filtra per prezzo massimo, piattaforma, e altro  
 ✅ **Dashboard responsive** — Interfaccia moderna e mobile-friendly  
 ✅ **Integrazione API** — Sfrutta l'API pubblica di IsThereAnyDeal per dati sempre aggiornati  
+✅ **Copertine resilienti** — Usa automaticamente la copertina verticale dello Steam Store se quella ITAD è assente o non caricabile
 ✅ **Zero scraping complesso** — Nessun web scraping, solo API pulite e stabili  
 ✅ **Wishlist locale** — Salva i giochi preferiti nel browser, senza account
 
@@ -162,7 +163,10 @@ API_TIMEOUT = 5          # Timeout richieste API (secondi)
 
 ## 🌐 API Utilizzata
 
-**IsThereAnyDeal** — https://isthereanydeal.com/api/v2/docs/
+**IsThereAnyDeal** — https://isthereanydeal.com/api/v2/docs/ per ricerca e prezzi.
+
+**Steam Store Search** — fallback pubblico senza API key usato esclusivamente per
+individuare l'app id e mostrare la relativa copertina verticale ufficiale.
 
 ### Endpoint principali
 
