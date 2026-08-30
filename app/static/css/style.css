@@ -126,8 +126,49 @@ input:focus, select:focus { border-color: rgba(103, 232, 249, .8); box-shadow: 0
 .wishlist-button:focus-visible { outline: 3px solid rgba(103, 232, 249, .7); outline-offset: 2px; }
 .wishlist-button.is-saved { color: #fb7185; background: rgba(136, 19, 55, .8); }
 .results-game-card .price-card { padding-top: 48px; }
-.game-cover img, .game-image-placeholder { width: 108px; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 18px; background: linear-gradient(135deg, #1e293b, #312e81); }
-.game-image-placeholder { display: grid; place-items: center; font-size: 2rem; }
+
+/* === Game Cover Container === */
+.game-cover {
+    position: relative;
+    width: 108px;
+    aspect-ratio: 3 / 4;
+    border-radius: 18px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1e293b, #312e81);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-cover > img {
+    width: 100%;
+}
+
+/* Immagine della copertina */
+.game-cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+/* Placeholder emoji quando la copertina non carica */
+.game-image-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    background: linear-gradient(135deg, #1e293b, #312e81);
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.game-image-placeholder[hidden] {
+    display: none;
+}
+
 .game-info h2 { margin: 8px 0 6px; color: var(--text-strong); font-size: 1.45rem; }
 .game-badges { display: flex; gap: 8px; flex-wrap: wrap; }
 .pill { padding: 6px 10px; border-radius: 999px; font-size: .72rem; font-weight: 800; letter-spacing: .08em; }
@@ -161,7 +202,16 @@ input:focus, select:focus { border-color: rgba(103, 232, 249, .8); box-shadow: 0
 
 @media (max-width: 860px) {
     .hero, .results-hero, .feature-grid, .game-card { grid-template-columns: 1fr; }
-    .game-cover img, .game-image-placeholder { width: 100%; max-height: 280px; }
+    .game-cover {
+        width: 100%;
+        max-height: 280px;
+    }
+
+    .game-cover-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
     .toolbar, .site-header { align-items: flex-start; flex-direction: column; border-radius: 24px; }
     .price-card { place-items: start; text-align: left; }
 }
@@ -172,4 +222,9 @@ input:focus, select:focus { border-color: rgba(103, 232, 249, .8); box-shadow: 0
     .site-nav { flex-wrap: wrap; }
     .per-page-selector { align-items: flex-start; flex-direction: column; width: 100%; }
     .per-page-selector select { width: 100%; }
+    .game-cover {
+        width: 100%;
+        aspect-ratio: auto;
+        min-height: 200px;
+    }
 }

@@ -7,7 +7,7 @@
     <a href="/" class="back-link">← Nuova ricerca</a>
     <div class="results-heading">
         <p class="eyebrow">Risultati ricerca</p>
-        <h1>Offerte per “{{ query }}”</h1>
+        <h1>Offerte per "{{ query }}"</h1>
         {% if games %}
             <p>{{ total_games }} risultat{{ 'o' if total_games == 1 else 'i' }} trovat{{ 'o' if total_games == 1 else 'i' }}{% if max_price %} entro €{{ "%.2f"|format(max_price) }}{% endif %}.</p>
         {% else %}
@@ -42,7 +42,7 @@
                     data-wishlist-button
                     data-game-id="{{ game.id or game.title }}"
                     data-game-title="{{ game.title or 'Titolo non disponibile' }}"
-                    data-game-image="{{ game.assets.boxart if game.assets and game.assets.boxart else '' }}"
+                    data-game-image=""
                     data-game-price="{{ current_price or '' }}"
                     data-game-shop="{{ game.best_shop or '' }}"
                     data-game-type="{{ game.type or '' }}"
@@ -52,13 +52,17 @@
                 >
                     <span aria-hidden="true">♡</span>
                 </button>
+
+                <!-- Game cover con fallback automatico -->
                 <div class="game-cover" data-cover-container>
-                    {% if game.assets and game.assets.boxart %}
-                        <img src="{{ game.assets.boxart }}" alt="Copertina di {{ game.title }}" loading="lazy" data-cover-fallback data-game-title="{{ game.title }}">
-                    {% else %}
-                        <img alt="Copertina di {{ game.title }}" loading="lazy" hidden data-cover-fallback data-game-title="{{ game.title }}">
-                    {% endif %}
-                    <div class="game-image-placeholder" {% if game.assets and game.assets.boxart %}hidden{% endif %} aria-label="Copertina non disponibile">🎮</div>
+                    <img 
+                        alt="Copertina di {{ game.title }}" 
+                        loading="lazy" 
+                        data-cover-fallback 
+                        data-game-title="{{ game.title }}"
+                        class="game-cover-image"
+                    >
+                    <div class="game-image-placeholder" aria-label="Copertina non disponibile">🎮</div>
                 </div>
 
                 <div class="game-info">
