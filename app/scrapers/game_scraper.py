@@ -21,7 +21,15 @@ def search_games(query):
         response.raise_for_status()
         games = response.json()
         
-        print(f"DEBUG - Giochi trovati: {len(games)}")
+        # Gestisci sia array che dict
+        if isinstance(games, dict):
+            games = games.get('data', [])
+        
+        print(f"DEBUG - Giochi trovati: {len(games) if isinstance(games, list) else 0}")
+        
+        if not isinstance(games, list):
+            print(f"ERROR - Risposta non è una lista: {type(games)}")
+            return []
         
         # Ora per ogni gioco, recupera i prezzi/deals
         games_with_deals = []
@@ -46,91 +54,111 @@ def search_games(query):
 
 
 def get_game_deals(game):
-    """Recupera i prezzi e le offerte per un gioco specifico"""
+    """Recupera i prezzi e le offerte per un gioco specifico usando POST"""
     
-    # Il "plain" è l'identificatore corretto per l'endpoint /games/overview/v1
-    # È il nome normalizzato del gioco (es: "cyberpunk-2077")
-    game_plain = game.get('plain')
+    game_id = game.get('id')
     
-    if not game_plain:
-        print(f"WARNING - Gioco senza 'plain': {game.get('title')}")
-        return game  # Ritorna il gioco anche senza deals
+    if not game_id:
+        print(f"WARNING - Gioco senza 'id': {game.get('title')}")
+        return game
     
-    url = "https://api.isthereanydeal.com/games/overview/v1"
+    url = "https://api.isthereanydeal.com/games/prices/v3"
     
     headers = {
-        "ITAD-API-Key": ITAD_API_KEY
+        "ITAD-API-Key": ITAD_API_KEY,
+        "Content-Type": "application/json"
     }
     
-    # USO 'plain' INVECE DI 'id'
-    params = {
-        "plain": game_plain
-    }
+    # L'endpoint /games/prices/v3 richiede POST con array di ID nel body
+    payload = [game_id]
     
     try:
-        response = requests.get(url, headers=headers, params=params, timeout=5)
+        response = requests.post(url, headers=headers, json=payload, timeout=5)
+        
+        if response.status_code == 404:
+            print(f"⚠️  {game.get('title')} - Non trovato (404)")
+            return game
+        
         response.raise_for_status()
         
         data = response.json()
         
-        # Estrai i dati delle offerte
-        overview = data.get('overview', {})
-        
-        # Aggiungi le informazioni di prezzo al gioco
-        game['lowest_price'] = overview.get('price')  # Campo principale del prezzo
-        game['lowest_deal_price'] = overview.get('priceNew')  # Prezzo in offerta
-        game['shop'] = overview.get('shop', {})
-        
-        # Prova a ottenere i dettagli dei negozi con i prezzi
-        game['deals'] = extract_deals_from_list(data)
-        
-        print(f"✓ {game.get('title')} - Prezzo: €{game.get('lowest_price', 'N/A')}")
+        # La risposta è un array, il primo elemento contiene i dati del gioco
+        if isinstance(data, list) and data:
+            game_prices = data[0]
+            
+            # Estrai i deals
+            deals = game_prices.get('deals', [])
+            
+            # Il primo deal è il prezzo più basso
+            if deals:
+                first_deal = deals[0]
+                
+                # Estrai prezzo e negozio dal primo deal
+                price_info = first_deal.get('price', {})
+                lowest_price = price_info.get('amount')
+                
+                shop_info = first_deal.get('shop', {})
+                shop_name = shop_info.get('name', 'Unknown')
+                
+                # Aggiungi le informazioni di prezzo al gioco
+                game['lowest_price'] = lowest_price
+                game['best_shop'] = shop_name
+                
+                # Estrai i dettagli di tutti i negozi
+                game['deals'] = extract_deals_from_prices(deals)
+                
+                price_str = f"€{lowest_price:.2f}" if lowest_price else "N/A"
+                print(f"✓ {game.get('title')} - Prezzo: {price_str} ({shop_name})")
+            else:
+                game['lowest_price'] = None
+                game['best_shop'] = 'Unknown'
+                game['deals'] = []
         
         return game
         
     except requests.exceptions.RequestException as e:
-        print(f"Errore nel recupero deals per {game_plain}: {e}")
-        return game  # Ritorna il gioco anche senza deals
-    except ValueError as e:
-        print(f"Errore JSON nei deals per {game_plain}: {e}")
+        print(f"Errore nel recupero deals per {game_id}: {e}")
+        return game
+    except (ValueError, AttributeError, KeyError) as e:
+        print(f"Errore nel parsing deals per {game_id}: {e}")
         return game
 
 
-def extract_deals_from_list(data):
-    """Estrae una lista formattata di negozi e prezzi dai dati overview"""
+def extract_deals_from_prices(deals):
+    """Estrae una lista formattata di negozi e prezzi dai deals"""
     
-    deals = []
+    extracted_deals = []
     
-    # I dati arrivano in formato "list" che contiene i vari negozi
-    list_data = data.get('list', [])
+    if isinstance(deals, list) and deals:
+        # Itera sui deals disponibili (max 15)
+        for idx, deal in enumerate(deals[:15]):
+            try:
+                # Estrai i dati dello shop
+                shop_info = deal.get('shop', {}) if isinstance(deal.get('shop'), dict) else {}
+                shop_name = shop_info.get('name', 'Unknown')
+                
+                # Estrai il prezzo
+                price_info = deal.get('price', {}) if isinstance(deal.get('price'), dict) else {}
+                price = price_info.get('amount')
+                
+                # Converti a float se necessario
+                if price and isinstance(price, str):
+                    price = float(price)
+                
+                if price:  # Includi solo se ha un prezzo
+                    extracted_deal = {
+                        'shop_name': shop_name,
+                        'shop_logo': '',
+                        'price': float(price) if price else None,
+                        'url': deal.get('url', ''),
+                        'is_best': idx == 0,  # Il primo è il migliore
+                        'original_price': None,
+                        'discount_price': None
+                    }
+                    extracted_deals.append(extracted_deal)
+            except (ValueError, TypeError, AttributeError) as e:
+                print(f"WARNING - Errore nel parsing deal {idx}: {e}")
+                continue
     
-    if isinstance(list_data, list) and list_data:
-        # Itera sui negozi disponibili
-        for idx, shop_data in enumerate(list_data[:15]):  # Top 15 negozi
-            
-            # Estrai i dati dello shop
-            shop_info = shop_data.get('shop', {})
-            shop_name = shop_info.get('name', 'Unknown')
-            shop_logo = shop_info.get('logo', '')
-            
-            # Estrai il prezzo
-            price = shop_data.get('price')
-            price_new = shop_data.get('priceNew')  # Prezzo in offerta
-            
-            # Usa il prezzo in offerta se disponibile, altrimenti il prezzo normale
-            final_price = price_new if price_new else price
-            
-            deal = {
-                'shop_name': shop_name,
-                'shop_logo': shop_logo,
-                'price': final_price,
-                'url': shop_data.get('url', ''),
-                'is_best': idx == 0,  # Il primo è il migliore
-                'original_price': price,
-                'discount_price': price_new
-            }
-            
-            if final_price:  # Includi solo se ha un prezzo
-                deals.append(deal)
-    
-    return deals
+    return extracted_deals

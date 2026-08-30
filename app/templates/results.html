@@ -384,31 +384,42 @@
                             <div class="price-section">
                                 <div class="price-label">💰 Miglior Prezzo</div>
                                 <div class="price-value">
-                                    €{{ "%.2f"|format(game.lowest_price) }}
+                                    {% if game.lowest_price is number %}
+                                        €{{ "%.2f"|format(game.lowest_price) }}
+                                    {% else %}
+                                        €{{ game.lowest_price }}
+                                    {% endif %}
                                 </div>
                             </div>
                             
-                            {% if game.lowest_deal_price and game.lowest_deal_price|float != game.lowest_price|float %}
-                                <div class="price-section" style="background: rgba(76, 175, 80, 0.3); border-left: 3px solid #4CAF50;">
-                                    <div class="price-label">🎉 In Offerta</div>
-                                    <div class="price-value">
-                                        €{{ "%.2f"|format(game.lowest_deal_price) }}
+                            {% if game.lowest_deal_price %}
+                                {% set price_val = game.lowest_price|float %}
+                                {% set deal_val = game.lowest_deal_price|float %}
+                                {% if deal_val < price_val %}
+                                    <div class="price-section" style="background: rgba(76, 175, 80, 0.3); border-left: 3px solid #4CAF50;">
+                                        <div class="price-label">🎉 In Offerta</div>
+                                        <div class="price-value">
+                                            €{{ "%.2f"|format(deal_val) }}
+                                        </div>
+                                        <div style="font-size: 0.75em; opacity: 0.9; margin-top: 4px;">
+                                            Sconto: {{ ((price_val - deal_val) / price_val * 100)|int }}%
+                                        </div>
                                     </div>
-                                </div>
+                                {% endif %}
                             {% endif %}
                             
-                            {% if game.shop and game.shop.name %}
+                            {% if game.best_shop %}
                                 <div class="price-section">
-                                    <div class="price-label">🏪 Negozio</div>
+                                    <div class="price-label">🏪 Miglior Negozio</div>
                                     <div style="font-size: 0.95em; font-weight: 600;">
-                                        {{ game.shop.name }}
+                                        {{ game.best_shop }}
                                     </div>
                                 </div>
                             {% endif %}
                             
                             {% if game.deals and game.deals|length > 0 %}
                                 <div class="deals-list">
-                                    <div class="deals-title">📋 Altri Negozi</div>
+                                    <div class="deals-title">📋 Altre Offerte</div>
                                     {% for deal in game.deals[:8] %}
                                         {% if deal.price %}
                                             <div class="deal-item {% if deal.is_best %}deal-best{% endif %}">
@@ -422,7 +433,7 @@
                         {% else %}
                             <div class="price-section">
                                 <div class="no-price-message">📊 Prezzo non disponibile</div>
-                                <p style="font-size: 0.8em; margin-top: 8px; opacity: 0.8;">Gioco non trovato su IsThereAnyDeal</p>
+                                <p style="font-size: 0.8em; margin-top: 8px; opacity: 0.8;">Gioco non trovato sui negozi supportati</p>
                             </div>
                         {% endif %}
                     </div>
