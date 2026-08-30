@@ -101,7 +101,9 @@ def search_games(query, limit=100, max_price=None):
             print(f"ERROR - Risposta non è una lista: {type(games)}")
             return []
 
-        # Applica ranking intelligente PRIMA di recuperare i prezzi
+        # Applica ranking intelligente PRIMA di recuperare i prezzi.
+        # L'ordine restituito dall'API viene mantenuto come segnale di popolarità:
+        # ITAD tende a mettere per primi i risultati più riconoscibili/rilevanti.
         games = rank_games(games, query)
         print(f"DEBUG - Giochi dopo ranking: {len(games)}")
 
@@ -117,10 +119,10 @@ def search_games(query, limit=100, max_price=None):
             ]
             print(f"DEBUG - Giochi dopo filtro prezzo: {len(games_with_deals)}")
 
-        # Ordina per prezzo (dal più basso al più alto)
-        games_with_deals.sort(
-            key=lambda x: x.get('lowest_price') if x.get('lowest_price') else float('inf')
-        )
+        # Mantieni i risultati più popolari/rilevanti in alto e usa il prezzo solo
+        # come criterio secondario. Ordinare esclusivamente per prezzo faceva finire
+        # giochi minori ma economici davanti ai titoli più cercati (es. Cyberpunk 2077).
+        games_with_deals.sort(key=result_order_key)
 
         _set_cached_search(cache_key, games_with_deals)
         return games_with_deals
@@ -133,48 +135,65 @@ def search_games(query, limit=100, max_price=None):
         return []
 
 
-def rank_games(games, query):
-    """
-    Ordina i giochi per rilevanza usando un sistema di ranking intelligente.
-    """
+def calculate_relevance_score(game, query):
+    """Calcola uno score di rilevanza/popolarità (più alto = più rilevante)."""
 
     query_lower = query.lower().strip()
+    title = game.get('title', '').lower()
+    game_type = game.get('type', 'game')
+    original_position = game.get('_search_position', 0)
 
-    def calculate_relevance_score(game):
-        """Calcola uno score di rilevanza (più alto = più rilevante)"""
-        title = game.get('title', '').lower()
-        game_type = game.get('type', 'game')
+    score = 0
 
-        score = 0
+    # L'ordine originale dell'API è un segnale utile per la popolarità: i titoli
+    # principali vengono normalmente restituiti prima di DLC, bundle e giochi minori.
+    score += max(0, 1000 - (int(original_position) * 10))
 
-        if title == query_lower:
-            score += 10000
-        elif title.startswith(query_lower):
-            score += 5000
-        elif query_lower in title:
-            score += 2000
+    if title == query_lower:
+        score += 10000
+    elif title.startswith(f"{query_lower} ") or title.startswith(f"{query_lower}:"):
+        score += 7000
+    elif title.startswith(query_lower):
+        score += 5000
+    elif query_lower in title:
+        score += 2000
 
-        if game_type == 'game':
-            score += 500
-        elif game_type == 'dlc':
-            score += 100
-        elif game_type == 'bundle':
-            score += 50
+    if game_type == 'game':
+        score += 500
+    elif game_type == 'dlc':
+        score += 100
+    elif game_type == 'bundle':
+        score += 50
 
-        title_words = len(title.split())
-        if title_words <= 4:
-            score += 300 - (title_words * 10)
+    title_words = len(title.split())
+    if title_words <= 4:
+        score += 300 - (title_words * 10)
 
-        if game.get('mature', False):
-            score -= 100
+    if game.get('mature', False):
+        score -= 100
 
-        return score
+    return score
 
-    ranked_games = sorted(games, key=calculate_relevance_score, reverse=True)
+
+def result_order_key(game):
+    """Chiave di ordinamento finale: rilevanza/popolarità prima, prezzo dopo."""
+
+    relevance_score = game.get('_relevance_score', 0)
+    lowest_price = game.get('lowest_price') if game.get('lowest_price') else float('inf')
+    return (-relevance_score, lowest_price)
+
+
+def rank_games(games, query):
+    """Ordina i giochi privilegiando popolarità/rilevanza rispetto al prezzo."""
+
+    for position, game in enumerate(games):
+        game['_search_position'] = position
+        game['_relevance_score'] = calculate_relevance_score(game, query)
+
+    ranked_games = sorted(games, key=lambda game: (-game['_relevance_score'], game['_search_position']))
 
     for idx, game in enumerate(ranked_games[:5]):
-        score = calculate_relevance_score(game)
-        print(f"  [{idx+1}] {game.get('title')} ({game.get('type')}) - Score: {score}")
+        print(f"  [{idx+1}] {game.get('title')} ({game.get('type')}) - Score: {game.get('_relevance_score')}")
 
     return ranked_games
 
