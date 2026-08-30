@@ -52,12 +52,13 @@
                 >
                     <span aria-hidden="true">♡</span>
                 </button>
-                <div class="game-cover">
+                <div class="game-cover" data-cover-container>
                     {% if game.assets and game.assets.boxart %}
-                        <img src="{{ game.assets.boxart }}" alt="Copertina di {{ game.title }}" loading="lazy">
+                        <img src="{{ game.assets.boxart }}" alt="Copertina di {{ game.title }}" loading="lazy" data-cover-fallback data-game-title="{{ game.title }}">
                     {% else %}
-                        <div class="game-image-placeholder">🎮</div>
+                        <img alt="Copertina di {{ game.title }}" loading="lazy" hidden data-cover-fallback data-game-title="{{ game.title }}">
                     {% endif %}
+                    <div class="game-image-placeholder" {% if game.assets and game.assets.boxart %}hidden{% endif %} aria-label="Copertina non disponibile">🎮</div>
                 </div>
 
                 <div class="game-info">

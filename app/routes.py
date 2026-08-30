@@ -1,6 +1,7 @@
 from flask import render_template, request, jsonify
 from app import app
 from app.scrapers.game_scraper import build_search_url, search_games
+from app.services.cover_fallback import find_fallback_cover
 import math
 
 
@@ -14,6 +15,21 @@ def index():
 def wishlist():
     """Mostra i giochi salvati nel browser dell'utente."""
     return render_template('wishlist.html')
+
+
+@app.route('/api/game-cover')
+def game_cover():
+    """Restituisce una copertina alternativa quando quella primaria non carica."""
+
+    title = request.args.get('title', '').strip()
+    if not title or len(title) > 200:
+        return jsonify({'error': 'Titolo non valido'}), 400
+
+    cover_url = find_fallback_cover(title)
+    if not cover_url:
+        return jsonify({'error': 'Copertina alternativa non trovata'}), 404
+
+    return jsonify({'cover_url': cover_url})
 
 
 # Route che riceve i dati dal form
