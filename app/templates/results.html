@@ -9,7 +9,7 @@
         <p class="eyebrow">Risultati ricerca</p>
         <h1>Offerte per “{{ query }}”</h1>
         {% if games %}
-            <p>{{ total_games }} risultato{{ '' if total_games == 1 else 'i' }} trovato{{ '' if total_games == 1 else 'i' }}{% if max_price %} entro €{{ "%.2f"|format(max_price) }}{% endif %}.</p>
+            <p>{{ total_games }} risultat{{ 'o' if total_games == 1 else 'i' }} trovat{{ 'o' if total_games == 1 else 'i' }}{% if max_price %} entro €{{ "%.2f"|format(max_price) }}{% endif %}.</p>
         {% else %}
             <p>Nessun risultato disponibile: prova una query più generica o rimuovi il budget massimo.</p>
         {% endif %}

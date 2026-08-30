@@ -35,7 +35,6 @@ a { color: inherit; }
 .app-shell {
     width: min(1180px, calc(100% - 32px));
     margin: 0 auto;
-    padding: 26px 0 56px;
 }
 
 .site-header, .search-panel, .feature-card, .toolbar, .game-card, .empty-state {
